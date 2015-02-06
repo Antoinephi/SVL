@@ -1,0 +1,3 @@
+Antoine PHILIPPE / Damien Cornette
+
+La classe transformateur est terminée, néanmoins le dernier test de l'écriture du fichier ne fonctionne pas, car on ne savait comment lire la sortie standard depuis le test pour vérifer.
