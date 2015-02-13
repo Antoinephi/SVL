@@ -80,6 +80,13 @@ class Jeu :
 	def __init__(self):
 		self.j1 = None
 		self.j2 = None
-		self.listeClapet = None
+		self.listeClapet = ['']
 
 
+	def init_clapets(self):
+
+		for i in range(8):
+			self.listeClapet.append(Clapet(i+1))
+
+	def getListeClapets(self):
+		return self.listeClapet

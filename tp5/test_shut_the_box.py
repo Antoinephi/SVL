@@ -31,12 +31,12 @@ class TestClapet(unittest.TestCase):
 		self.clapet.fermer()
 		self.assertRaises(ClapetDejaFermeErreur, self.clapet.fermer)
 
-	# def test_clapet_deja_ferme(self):
-
-
 class TestJeu(unittest.TestCase):
 
 	def setUp(self):
 		self.jeu = Jeu()
 
-	
+
+	def test_clapets_init_ok(self):
+		self.jeu.init_clapets()
+		self.assertTrue(len(self.jeu.getListeClapets()) > 0)
