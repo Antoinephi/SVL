@@ -3,54 +3,103 @@
 module fermier
 open util/ordering[Etat]
 
-abstract sig Object {}
-one sig Chou extends Object {}
-one sig Loup extends Object {
-	mange : Chevre
+abstract sig Personnage {
+	mange : lone Personnage
 }
-one sig Chevre extends Object {
-	mange : Chou
-}
-one sig Fermier extends Object {}
 
-one sig Etat {
-	rive_droite : set Object,
-	rive_gauche : set Object 
+one sig Chou extends Personnage {}
+one sig Loup extends Personnage {}
+one sig Chevre extends Personnage {}
+one sig Fermier extends Personnage {}
+
+sig Etat {
+	rive_droite : set Personnage,
+	rive_gauche : set Personnage,
+	mort : set Personnage,
 }
+
+
+/******* Invariants ********/
+
+
+fact qui_mange_qui {
+	Loup.mange = Chevre
+	Chevre.mange = Chou
+	Chou.mange = none
+	Fermier.mange = none
+}
+
+fact un_personnage_n_a_qu_un_etat {
+   all etat : Etat | disj[etat.rive_droite, etat.rive_gauche, etat.mort] // disj : predicat predefini Alloy
+}
+
+fact un_personnage_a_un_etat {
+  all etat : Etat | etat.rive_droite + etat.rive_gauche + etat.mort= Personnage
+}
+
+
+fact etat_initial {
+  first.rive_gauche = Personnage
+  first.rive_droite = none // ens vide
+  no first.mort
+}
+
+fact etat_final {
+  last.rive_droite = Personnage
+  last.rive_gauche  = none
+  no last.mort
+}
+
 /******* Fonctions ********/
 
-fun qui_manque_qui(groupe : set Object) : set Object {
-	
 
+fun qui_est_mange (personnages : set Personnage) : set Personnage {
+	personnages.mange
 }
-
-
 
 
 /******** predicats *******/
 
-pred passage_droite_sans_objet(e : Etat, e' : Etat, f : Fermier){
-	e'.rive_gauche = e.rive_gauche - f 
-	e'.rive_droite = e.rive_droite + f
+
+pred fermier_passe_droite_a_gauche(f : Fermier, avant : Etat, apres : Etat) {
+	f in avant.rive_droite
+	apres.rive_droite = avant.rive_droite - f
+	apres.rive_gauche = avant.rive_gauche + f
 }
 
-pred passage_droite_avec_object(e : Etat, e' : Etat, f : Fermier, o : Object){
-	e'.rive_gauche = e.rive_gauche  - f - o
-	e'.rive_gauche = e.rive_gauche  - o
-	e'.e.rive_droite = e.rive_droite +  o
-	e'.e.rive_droite = e.rive_droite + f  
+pred fermier_passe_gauche_a_droite(f : Fermier, avant : Etat, apres : Etat) {
+	f in avant.rive_gauche
+	apres.rive_droite = avant.rive_droite + f
+	apres.rive_gauche = avant.rive_gauche - f
 }
 
-pred passage_gauche_sans_objet(e : Etat, e' Etat, f : Fermier){
-	e'.rive_droite = e.rive_droite - f 
-	e'.rive_gauche = rive_gauche + f
+pred fermier_passe_droite_a_gauche_avec_personnage(f : Fermier, p : Personnage, avant : Etat, apres : Etat) {
+	p in avant.rive_droite
+	f in avant.rive_droite
+	apres.rive_droite = avant.rive_droite - f - p
+	apres.rive_gauche = avant.rive_gauche + f + p
 }
 
-pred passage_gauche_avec_objet(e : Etat, e' Etat, f : Fermier, o : Object){
-	e'.rive_droite = e.rive_droite - f 
-	e'.rive_droite = e.rive_droite  - o
-	e'.rive_gauche = rive_gauche + f 
-	e'.rive_gauche = rive_gauche + o
+pred fermier_passe_gauche_a_droite_avec_personnage(f : Fermier, p : Personnage, avant : Etat, apres : Etat) {
+	p in avant.rive_gauche
+	f in avant.rive_gauche
+	apres.rive_droite = avant.rive_droite + f + p
+	apres.rive_gauche = avant.rive_gauche - f - p
 }
+
+pred fermier_passe_rive(f : Fermier, p : lone Personnage, avant : Etat , apres : Etat){
+	
+}
+
+pred generate {}
+
+
 
 /******* commandes **********/
+
+run generate for 4 Etat
+run fermier_passe_droite_a_gauche for 3 Etat
+run fermier_passe_gauche_a_droite for 3 Etat
+run fermier_passe_droite_a_gauche_avec_personnage for 3 Etat
+run fermier_passe_gauche_a_droite_avec_personnage for 3 Etat
+run fermier_passe_rive for 3 Etat
